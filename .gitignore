@@ -1,5 +1,36 @@
+# dependencies
 node_modules/
+
+# build output
 dist/
+*.tgz
+
+# local planning docs and agent scratch (kept out of the public repo)
 docs/
 .superpowers/
+.claude/
+
+# temp files from atomic writes and tests
 *.tmp
+*.bak-agent-taste
+
+# logs
+*.log
+npm-debug.log*
+bun-debug.log*
+
+# env and secrets
+.env
+.env.*
+!.env.example
+
+# test / coverage
+coverage/
+.nyc_output/
+
+# editors and OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
