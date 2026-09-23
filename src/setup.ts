@@ -3,6 +3,7 @@ import path from "node:path";
 import type { Flags, IO } from "./cli";
 import { cloudFolders } from "./detect";
 import { IntegrationError, makeCtx } from "./integrations/blocks";
+import { GUIDE, rotateToken } from "./integrations/chatgpt";
 import { INTEGRATIONS, getIntegration } from "./integrations/index";
 import { cleanLegacy } from "./integrations/legacy";
 import { PRESETS, presetMarkdown } from "./presets";
@@ -123,6 +124,10 @@ export async function cmdIntegrate(id: string, f: Flags, io: IO): Promise<number
   const cfg = readConfig(vault);
   const it = getIntegration(id);
   const ctx = makeCtx(home());
+  if (it.id === "chatgpt" && !f.off) {
+    io.out(GUIDE(rotateToken(vault), Number(f.port ?? 7717)));
+    return 0;
+  }
   if (f.off) it.remove(ctx); else it.install(ctx, cfg);
   cfg.integrations[it.id] = !f.off;
   writeConfig(vault, cfg);

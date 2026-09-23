@@ -1,3 +1,6 @@
+import crypto from "node:crypto";
+import http from "node:http";
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
@@ -90,4 +93,53 @@ export function createServer(vault: string, o: ServerOpts): McpServer {
 
 export async function runStdio(vault: string) {
   await createServer(vault, { remote: false, source: "claude-desktop" }).connect(new StdioServerTransport());
+}
+
+export const newToken = () => crypto.randomBytes(32).toString("base64url");
+export const hashToken = (t: string) => crypto.createHash("sha256").update(t).digest("hex");
+
+export function authorize(req: http.IncomingMessage, tokenHash: string | null): boolean {
+  if (!tokenHash) return false;
+  const p = new URL(req.url ?? "/", "http://x").pathname;
+  const h = req.headers.authorization;
+  const tok = h?.startsWith("Bearer ") ? h.slice(7) : /^\/mcp\/([A-Za-z0-9_-]+)$/.exec(p)?.[1];
+  if (!tok) return false;
+  const a = Buffer.from(hashToken(tok), "hex");
+  const b = Buffer.from(tokenHash, "hex");
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
+const ORIGINS = [/^https:\/\/([a-z0-9-]+\.)*(openai\.com|chatgpt\.com)$/];
+
+export function startHttp(vault: string, o: { port?: number; readOnly?: boolean } = {}): Promise<http.Server> {
+  const cfg0 = readConfig(vault);
+  if (!cfg0.remote.tokenHash) throw new Error("No token set. Run: agent-taste integrate chatgpt");
+  const allowWrite = makeLimiter(cfg0.remote.writesPerHour);
+  const srv = http.createServer(async (req, res) => {
+    const deny = (code: number, msg: string) => { if (!res.headersSent) res.writeHead(code, { "content-type": "text/plain" }); res.end(msg); };
+    try {
+      const origin = req.headers.origin;
+      if (origin && !ORIGINS.some((r) => r.test(origin))) return deny(403, "forbidden");
+      const p = new URL(req.url ?? "/", "http://x").pathname;
+      if (p !== "/mcp" && !p.startsWith("/mcp/")) return deny(404, "not found");
+      if (!authorize(req, readConfig(vault).remote.tokenHash)) return deny(401, "unauthorized");
+      if (Number(req.headers["content-length"] ?? 0) > 65_536) return deny(413, "too large");
+      let body = "";
+      for await (const c of req) {
+        body += c;
+        if (body.length > 65_536) return deny(413, "too large");
+      }
+      let parsed: unknown;
+      if (body) { try { parsed = JSON.parse(body); } catch { return deny(400, "bad json"); } }
+      const server = createServer(vault, { remote: true, source: "chatgpt", readOnly: o.readOnly, allowWrite });
+      const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
+      res.on("close", () => { transport.close(); server.close(); });
+      await server.connect(transport);
+      await transport.handleRequest(req, res, parsed);
+    } catch (e) {
+      appendLog(vault, `mcp http error: ${(e as Error).message}`);
+      deny(500, "error");
+    }
+  });
+  return new Promise((resolve) => srv.listen(o.port ?? 7717, "127.0.0.1", () => resolve(srv)));
 }

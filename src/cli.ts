@@ -11,7 +11,8 @@ import { setHook } from "./integrations/claude";
 import { VERSION } from "./version";
 import { captureTranscript, detachCapture } from "./capture";
 import { cmdBackfill } from "./backfill";
-import { runStdio } from "./mcp";
+import { GUIDE, rotateToken } from "./integrations/chatgpt";
+import { runStdio, startHttp } from "./mcp";
 import { cmdInit, cmdIntegrate, cmdStatus, cmdUninstall, cmdUpdate } from "./setup";
 import {
   type Config, home, loadDoc, month, readConfig, regenJson, resolveVault, saveDoc, today, VaultError, withLock, writeConfig,
@@ -216,8 +217,13 @@ export async function main(argv: string[], io: IO = defaultIO()): Promise<number
       case "backfill": return await cmdBackfill(f, io);
       case "mcp": {
         const vault = resolveVault();
-        await runStdio(vault);
-        return await new Promise<number>(() => {}); // stdio server runs until the client disconnects
+        const port = Number(f.port ?? 7717);
+        if (f["rotate-token"]) { io.out(GUIDE(rotateToken(vault), port)); return 0; }
+        if (f.http) {
+          await startHttp(vault, { port, readOnly: f["read-only"] });
+          io.err(`agent-taste MCP on http://127.0.0.1:${port}/mcp (Ctrl+C to stop)`);
+        } else await runStdio(vault);
+        return await new Promise<number>(() => {}); // server runs until killed / client disconnects
       }
     }
     io.err(`Unknown command "${cmd}". See: agent-taste --help`);
