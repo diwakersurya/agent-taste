@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import readline from "node:readline/promises";
 import { parseArgs } from "node:util";
 import {
@@ -8,6 +9,8 @@ import { isSensitive } from "./filter";
 import { IntegrationError, makeCtx } from "./integrations/blocks";
 import { setHook } from "./integrations/claude";
 import { VERSION } from "./version";
+import { captureTranscript, detachCapture } from "./capture";
+import { cmdBackfill } from "./backfill";
 import { cmdInit, cmdIntegrate, cmdStatus, cmdUninstall, cmdUpdate } from "./setup";
 import {
   type Config, home, loadDoc, month, readConfig, regenJson, resolveVault, saveDoc, today, VaultError, withLock, writeConfig,
@@ -176,6 +179,24 @@ async function content(cmd: string, pos: string[], f: Flags, io: IO): Promise<nu
   return -1;
 }
 
+export async function cmdCapture(pos: string[], f: Flags, io: IO): Promise<number> {
+  if (process.env.AGENT_TASTE_CAPTURE) return 0; // we are inside an engine run
+  if (f.stdin) {
+    // Hook path: must never fail or block Claude Code.
+    try {
+      const payload = JSON.parse(await io.stdin());
+      const vault = resolveVault();
+      regenJson(vault);
+      if (!readConfig(vault).hook.enabled) return 0;
+      const t = String(payload.transcript_path ?? "");
+      if (t && fs.existsSync(t)) detachCapture(vault, t);
+    } catch {}
+    return 0;
+  }
+  await captureTranscript(resolveVault(), need(pos[0], "transcript path"));
+  return 0;
+}
+
 export async function main(argv: string[], io: IO = defaultIO()): Promise<number> {
   try {
     const { values: f, positionals } = parse(argv);
@@ -190,6 +211,8 @@ export async function main(argv: string[], io: IO = defaultIO()): Promise<number
       case "update": return cmdUpdate(io);
       case "integrate": return await cmdIntegrate(need(pos[0], "integration name"), f, io);
       case "uninstall": return await cmdUninstall(f, io);
+      case "capture": return await cmdCapture(pos, f, io);
+      case "backfill": return await cmdBackfill(f, io);
     }
     io.err(`Unknown command "${cmd}". See: agent-taste --help`);
     return 1;
