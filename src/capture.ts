@@ -1,5 +1,6 @@
 import { spawn } from "node:child_process";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { decisions, type Doc, DECISIONS, entries, hintOf } from "./doc";
 import { CAPTURE_MARK, extractFile, renderSessions } from "./extract";
@@ -21,7 +22,9 @@ export function engineArgv(cfg: Config, find: (b: string) => string | null = whi
   for (const b of cfg.engine === "auto" ? ["claude", "codex", "gemini"] : [cfg.engine]) {
     const p = find(b);
     if (!p) continue;
-    if (b === "claude") return [p, "-p", "--model", cfg.hook.model, "--no-session-persistence", "--output-format", "text"];
+    if (b === "claude") // no tools, no MCP servers, no project settings/hooks: the engine only returns JSON
+      return [p, "-p", "--model", cfg.hook.model, "--no-session-persistence", "--output-format", "text",
+        "--tools", "", "--strict-mcp-config", "--setting-sources", "user"];
     if (b === "codex") return [p, "exec", "-"];
     return [p, "-p", ""]; // gemini: stdin is appended to the (empty) -p prompt
   }
@@ -58,7 +61,7 @@ Rules: prefer bump/replace over add; never duplicate; financial/personal section
 
 export function runEngine(argv: string[], input: string, timeoutMs = 180_000): Promise<string> {
   return new Promise((resolve, reject) => {
-    const c = spawn(argv[0], argv.slice(1), { env: { ...process.env, AGENT_TASTE_CAPTURE: "1" }, stdio: ["pipe", "pipe", "pipe"] });
+    const c = spawn(argv[0], argv.slice(1), { cwd: os.tmpdir(), env: { ...process.env, AGENT_TASTE_CAPTURE: "1" }, stdio: ["pipe", "pipe", "pipe"] });
     let out = "", err = "";
     const t = setTimeout(() => { c.kill("SIGKILL"); reject(new Error(`engine timed out after ${timeoutMs}ms`)); }, timeoutMs);
     c.stdout.on("data", (d) => (out += d));

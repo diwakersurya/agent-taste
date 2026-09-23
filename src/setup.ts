@@ -14,11 +14,15 @@ import {
 const yes = (a: string, dflt = true) => (a === "" ? dflt : /^y/i.test(a));
 
 export function installBin(vault: string, self = process.env.AGENT_TASTE_SELF ?? process.argv[1] ?? ""): boolean {
-  if (path.basename(self) !== "agent-taste.js") return false; // dev/test runs from source; bundled runs copy themselves
+  let real = self;
+  try { real = fs.realpathSync(self); } catch {} // npx / npm -g run us through node_modules/.bin/agent-taste
+  if (path.basename(real) !== "agent-taste.js") return false; // dev/test runs from source; bundled runs copy themselves
   const dst = paths(vault).bin;
   fs.mkdirSync(path.dirname(dst), { recursive: true });
-  if (path.resolve(self) !== path.resolve(dst)) fs.copyFileSync(self, dst);
+  if (path.resolve(real) !== path.resolve(dst)) fs.copyFileSync(real, dst);
   fs.chmodSync(dst, 0o755);
+  // the bundle is ESM; without this, Node < 20.19 loads the copy as CommonJS and fails
+  fs.writeFileSync(path.join(path.dirname(dst), "package.json"), '{ "type": "module" }\n');
   return true;
 }
 
@@ -144,7 +148,12 @@ export async function cmdUninstall(f: Flags, io: IO): Promise<number> {
   io.out("Removed agent-taste from all tool configs.");
   if (f.purge && vault) {
     const ok = f.yes || (await io.ask(`Delete the vault ${vault} and your taste profile permanently? Type "delete": `)) === "delete";
-    if (ok) { fs.rmSync(vault, { recursive: true, force: true }); io.out(`Deleted ${vault}`); }
+    if (ok) {
+      const p = paths(vault);
+      for (const f of [p.md, p.json, p.config, p.log, p.lock]) fs.rmSync(f, { force: true });
+      fs.rmSync(path.dirname(p.bin), { recursive: true, force: true });
+      try { fs.rmdirSync(vault); io.out(`Deleted ${vault}`); } catch { io.out(`Deleted agent-taste files; kept ${vault} (it has other files)`); }
+    }
   } else if (vault) io.out(`Your profile is kept at ${vault}`);
   return 0;
 }

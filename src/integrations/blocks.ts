@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { which } from "../capture";
 import { atomicWrite, type Config } from "../vault";
 
 export const START = "<!-- agent-taste:start -->";
@@ -20,7 +21,7 @@ export type Integration = {
 export const makeCtx = (home: string): Ctx => ({
   home,
   bin: path.join(home, ".agent-taste", "bin", "agent-taste.js"),
-  node: process.execPath,
+  node: which("node") ?? process.execPath, // shim survives node upgrades; execPath is versioned
   taste: path.join(home, ".agent-taste", "taste.md"),
 });
 

@@ -10,7 +10,7 @@ const MARK = "agent-taste.js";
 export function setHook(ctx: Ctx, on: boolean) {
   editJson(settingsFile(ctx), (o) => {
     const list = ((o.hooks?.SessionEnd ?? []) as unknown[]).filter((e) => !JSON.stringify(e).includes(MARK));
-    if (on) list.push({ hooks: [{ type: "command", command: `node "${ctx.bin}" capture --stdin`, timeout: 10 }] });
+    if (on) list.push({ hooks: [{ type: "command", command: `f="${ctx.bin}"; [ -f "$f" ] && node "$f" capture --stdin; exit 0`, timeout: 10 }] });
     if (list.length) { o.hooks ??= {}; o.hooks.SessionEnd = list; }
     else if (o.hooks) {
       delete o.hooks.SessionEnd;

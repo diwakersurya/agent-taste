@@ -74,7 +74,9 @@ export function saveDoc(vault: string, doc: Doc) {
   atomicWrite(p.json, JSON.stringify(toJson(doc), null, 2) + "\n");
 }
 
-export const regenJson = (vault: string) => saveDoc(vault, loadDoc(vault));
+// json only: rewriting taste.md here could revert a user edit that lands mid-call
+export const regenJson = (vault: string) =>
+  atomicWrite(paths(vault).json, JSON.stringify(toJson(loadDoc(vault)), null, 2) + "\n");
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 

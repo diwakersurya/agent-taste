@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { atomicWrite } from "../vault";
-import { type Ctx, editJson } from "./blocks";
+import { backupOnce, type Ctx, editJson } from "./blocks";
 import { settingsFile } from "./claude";
 import { desktopConfigFile } from "./claudeDesktop";
 
@@ -15,7 +15,7 @@ export function cleanLegacy(ctx: Ctx): string[] {
     if (!fs.existsSync(f)) continue;
     const cur = fs.readFileSync(f, "utf8");
     const next = cur.replace(LEGACY_MD, "");
-    if (next !== cur) { atomicWrite(f, next); changed.push(f); }
+    if (next !== cur) { backupOnce(f); atomicWrite(f, next); changed.push(f); }
   }
   const s = settingsFile(ctx);
   if (fs.existsSync(s)) {

@@ -4,7 +4,7 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { decisions, type Doc, entries, findSection, hintOf, norm, serialize, slug } from "./doc";
+import { ARCHIVED, decisions, type Doc, entries, findSection, hintOf, norm, serialize, slug } from "./doc";
 import { applyOps, type Op, snapshotOf, validateOps } from "./ops";
 import { VERSION } from "./version";
 import { appendLog, loadDoc, readConfig, saveDoc, withLock } from "./vault";
@@ -26,7 +26,8 @@ const ok = (text: string) => ({ content: [{ type: "text" as const, text }] });
 const fail = (text: string) => ({ content: [{ type: "text" as const, text }], isError: true });
 
 export function createServer(vault: string, o: ServerOpts): McpServer {
-  const hidden = (s: string) => o.remote && readConfig(vault).remote.excludeSections.includes(s);
+  // Archived can hold entries moved out of hidden sections, so it is never exposed remotely.
+  const hidden = (s: string) => o.remote && (s === ARCHIVED || readConfig(vault).remote.excludeSections.includes(s));
   const visible = (doc: Doc): Doc => ({ preamble: doc.preamble, sections: doc.sections.filter((s) => !hidden(s.slug)) });
   const s = new McpServer({ name: "agent-taste", version: VERSION });
 
@@ -124,11 +125,14 @@ export function startHttp(vault: string, o: { port?: number; readOnly?: boolean 
       if (p !== "/mcp" && !p.startsWith("/mcp/")) return deny(404, "not found");
       if (!authorize(req, readConfig(vault).remote.tokenHash)) return deny(401, "unauthorized");
       if (Number(req.headers["content-length"] ?? 0) > 65_536) return deny(413, "too large");
-      let body = "";
-      for await (const c of req) {
-        body += c;
-        if (body.length > 65_536) return deny(413, "too large");
+      const chunks: Buffer[] = [];
+      let size = 0;
+      for await (const c of req as AsyncIterable<Buffer>) {
+        size += c.length;
+        if (size > 65_536) return deny(413, "too large");
+        chunks.push(c);
       }
+      const body = Buffer.concat(chunks).toString("utf8");
       let parsed: unknown;
       if (body) { try { parsed = JSON.parse(body); } catch { return deny(400, "bad json"); } }
       const server = createServer(vault, { remote: true, source: "chatgpt", readOnly: o.readOnly, allowWrite });

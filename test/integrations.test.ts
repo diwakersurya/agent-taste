@@ -72,7 +72,7 @@ describe("tools", () => {
     expect(r(md)).not.toContain("My Drive");
     const s = JSON.parse(r(settingsFile(ctx)));
     expect(s.hooks.SessionEnd).toHaveLength(2);
-    expect(s.hooks.SessionEnd[1].hooks[0].command).toBe(`node "${home}/.agent-taste/bin/agent-taste.js" capture --stdin`);
+    expect(s.hooks.SessionEnd[1].hooks[0].command).toBe(`f="${home}/.agent-taste/bin/agent-taste.js"; [ -f "$f" ] && node "$f" capture --stdin; exit 0`);
     claude.install(ctx, cfg);
     expect(JSON.parse(r(settings)).hooks.SessionEnd).toHaveLength(2);
     claude.remove(ctx);

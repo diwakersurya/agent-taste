@@ -3,7 +3,7 @@ import readline from "node:readline/promises";
 import { parseArgs } from "node:util";
 import {
   addDecision, addPref, addSection, decisions, type Doc, DocError, entries, findSection, hintOf, norm,
-  removeSection, renameSection, serialize, setHint,
+  removeSection, renameSection, serialize, setHint, slug,
 } from "./doc";
 import { isSensitive } from "./filter";
 import { IntegrationError, makeCtx } from "./integrations/blocks";
@@ -111,7 +111,13 @@ async function content(cmd: string, pos: string[], f: Flags, io: IO): Promise<nu
       }
       await mutate((doc) => {
         if (sub === "add") addSection(doc, need(a, "section title"), { hint: f.hint, after: f.after });
-        else if (sub === "rename") renameSection(doc, need(a, "old title"), need(b, "new title"));
+        else if (sub === "rename") {
+          renameSection(doc, need(a, "old title"), need(b, "new title"));
+          const vault = resolveVault();
+          const cfg = readConfig(vault);
+          const ex = cfg.remote.excludeSections;
+          if (ex.includes(slug(a!))) { cfg.remote.excludeSections = ex.map((x) => (x === slug(a!) ? slug(b!) : x)); writeConfig(vault, cfg); }
+        }
         else if (sub === "hint") setHint(doc, need(a, "section title"), need(b, "hint text"));
         else if (sub === "remove") removeSection(doc, need(a, "section title"), f.archive ? "archive" : f.force ? "force" : "refuse");
         else throw new UsageError("section needs: list | add | rename | hint | remove");
@@ -238,4 +244,5 @@ export async function main(argv: string[], io: IO = defaultIO()): Promise<number
   }
 }
 
-if (import.meta.main || process.argv[1]?.endsWith("agent-taste.js")) main(process.argv.slice(2)).then((c) => process.exit(c));
+const entry = (() => { try { return fs.realpathSync(process.argv[1] ?? ""); } catch { return ""; } })();
+if (import.meta.main || entry.endsWith("agent-taste.js")) main(process.argv.slice(2)).then((c) => process.exit(c));

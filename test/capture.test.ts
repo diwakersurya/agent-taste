@@ -25,7 +25,8 @@ test("engineArgv", () => {
   expect(engineArgv({ ...c, engine: "/x/eng" })).toEqual(["/x/eng"]);
   expect(engineArgv(c, (b) => (b === "codex" ? "/bin/codex" : null))).toEqual(["/bin/codex", "exec", "-"]);
   expect(engineArgv(c, (b) => (b === "claude" ? "/bin/claude" : null))).toEqual([
-    "/bin/claude", "-p", "--model", "sonnet", "--no-session-persistence", "--output-format", "text"]);
+    "/bin/claude", "-p", "--model", "sonnet", "--no-session-persistence", "--output-format", "text",
+    "--tools", "", "--strict-mcp-config", "--setting-sources", "user"]);
   expect(engineArgv(c, () => null)).toBeNull();
 });
 

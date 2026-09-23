@@ -21,6 +21,9 @@ function textProblem(t: unknown): string | null {
   if (t.length > MAX) return `text over ${MAX} chars`;
   if (/[\r\n]/.test(t)) return "multi-line text";
   if (isSensitive(t)) return "looks like a secret or personal identifier";
+  if (/(^|\s)@(~|\.{0,2}\/)/.test(t)) return "looks like a file import (@path)";
+  if (/<!--|-->/.test(t)) return "contains an HTML comment";
+  if (/\(seen \d+x/.test(t)) return "contains an evidence suffix";
   return null;
 }
 
@@ -56,7 +59,7 @@ export function validateOps(raw: unknown, doc: Doc, caps: Caps, opts: { hidden?:
         if (!problem && op.why !== undefined && op.why !== null && op.why !== "") problem = textProblem(op.why);
         if (!problem && op.date !== undefined && !(typeof op.date === "string" && DATE.test(op.date))) problem = "bad date";
         for (const k of ["tool", "folder"] as const)
-          if (!problem && op[k] !== undefined && !(typeof op[k] === "string" && TAG.test(op[k] as string))) problem = `bad ${k}`;
+          if (!problem && op[k] !== undefined && !(typeof op[k] === "string" && TAG.test(op[k] as string) && !isSensitive(op[k] as string))) problem = `bad ${k}`;
         if (!problem && count.log >= caps.log) problem = "over log cap";
         if (!problem) count.log++;
         break;
