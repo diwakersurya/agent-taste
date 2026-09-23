@@ -30,8 +30,12 @@ When I make a decision revealing durable taste (choose X over Y, reject an appro
 
 const read = (f: string) => (fs.existsSync(f) ? fs.readFileSync(f, "utf8") : null);
 
+// Back up the user's original only: a file already carrying our marker was created or
+// modified by us earlier, and backing it up would make uninstall keep a file we created.
 export function backupOnce(f: string) {
-  if (fs.existsSync(f) && !fs.existsSync(f + BAK)) fs.copyFileSync(f, f + BAK);
+  if (!fs.existsSync(f) || fs.existsSync(f + BAK)) return;
+  if (fs.readFileSync(f, "utf8").includes("agent-taste")) return;
+  fs.copyFileSync(f, f + BAK);
 }
 
 export const hasBlock = (f: string) => BLOCK.test(read(f) ?? "");

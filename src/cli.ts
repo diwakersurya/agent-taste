@@ -5,9 +5,10 @@ import {
   removeSection, renameSection, serialize, setHint,
 } from "./doc";
 import { isSensitive } from "./filter";
-import { makeCtx } from "./integrations/blocks";
+import { IntegrationError, makeCtx } from "./integrations/blocks";
 import { setHook } from "./integrations/claude";
 import { VERSION } from "./version";
+import { cmdInit, cmdIntegrate, cmdStatus, cmdUninstall, cmdUpdate } from "./setup";
 import {
   type Config, home, loadDoc, month, readConfig, regenJson, resolveVault, saveDoc, today, VaultError, withLock, writeConfig,
 } from "./vault";
@@ -183,10 +184,17 @@ export async function main(argv: string[], io: IO = defaultIO()): Promise<number
     if (f.help || !cmd) { io.out(HELP); return 0; }
     const r = await content(cmd, pos, f, io);
     if (r !== -1) return r;
+    switch (cmd) {
+      case "init": return await cmdInit(f, io);
+      case "status": return cmdStatus(io);
+      case "update": return cmdUpdate(io);
+      case "integrate": return await cmdIntegrate(need(pos[0], "integration name"), f, io);
+      case "uninstall": return await cmdUninstall(f, io);
+    }
     io.err(`Unknown command "${cmd}". See: agent-taste --help`);
     return 1;
   } catch (e) {
-    if (e instanceof DocError || e instanceof VaultError || e instanceof UsageError || (e as { code?: string }).code === "ERR_PARSE_ARGS_UNKNOWN_OPTION") {
+    if (e instanceof DocError || e instanceof VaultError || e instanceof UsageError || e instanceof IntegrationError || (e as { code?: string }).code === "ERR_PARSE_ARGS_UNKNOWN_OPTION") {
       io.err((e as Error).message);
       return 1;
     }

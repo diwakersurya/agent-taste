@@ -31,6 +31,18 @@ describe("blocks", () => {
     removeBlock(f);
     expect(fs.existsSync(f)).toBe(false);
   });
+  test("file we created stays ours across re-installs (no self-backup)", () => {
+    const f = path.join(home, "new2", "x.md");
+    upsertBlock(f, "one");
+    upsertBlock(f, "two");
+    removeBlock(f);
+    expect(fs.existsSync(f)).toBe(false);
+    const j = path.join(home, "new2", "c.json");
+    editJson(j, (o) => { o["agent-taste"] = 1; });
+    editJson(j, (o) => { o["agent-taste"] = 2; });
+    editJson(j, (o) => { delete o["agent-taste"]; });
+    expect(fs.existsSync(j)).toBe(false);
+  });
   test("backup written once", () => {
     const f = w("x.md", "orig");
     upsertBlock(f, "1"); upsertBlock(f, "2");
