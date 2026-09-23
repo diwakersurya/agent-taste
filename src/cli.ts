@@ -11,6 +11,7 @@ import { setHook } from "./integrations/claude";
 import { VERSION } from "./version";
 import { captureTranscript, detachCapture } from "./capture";
 import { cmdBackfill } from "./backfill";
+import { runStdio } from "./mcp";
 import { cmdInit, cmdIntegrate, cmdStatus, cmdUninstall, cmdUpdate } from "./setup";
 import {
   type Config, home, loadDoc, month, readConfig, regenJson, resolveVault, saveDoc, today, VaultError, withLock, writeConfig,
@@ -213,6 +214,11 @@ export async function main(argv: string[], io: IO = defaultIO()): Promise<number
       case "uninstall": return await cmdUninstall(f, io);
       case "capture": return await cmdCapture(pos, f, io);
       case "backfill": return await cmdBackfill(f, io);
+      case "mcp": {
+        const vault = resolveVault();
+        await runStdio(vault);
+        return await new Promise<number>(() => {}); // stdio server runs until the client disconnects
+      }
     }
     io.err(`Unknown command "${cmd}". See: agent-taste --help`);
     return 1;
