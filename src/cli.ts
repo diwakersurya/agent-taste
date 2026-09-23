@@ -34,29 +34,29 @@ export const defaultIO = (): IO => ({
   },
 });
 
-export const HELP = `agent-taste ${VERSION} — one taste profile for all your AI agents
+export const HELP = `taste-profile ${VERSION} — one taste profile for all your AI agents
 
 Setup
-  agent-taste init [--dir <path>] [--preset developer|designer|general|custom] [--yes] [--no-hook]
-  agent-taste status | update | uninstall [--purge]
-  agent-taste integrate <claude|gemini|codex|claude-desktop|chatgpt> [--off]
-  agent-taste hook on|off
-  agent-taste config get|set <key> [value]
+  taste-profile init [--dir <path>] [--preset developer|designer|general|custom] [--yes] [--no-hook]
+  taste-profile status | update | uninstall [--purge]
+  taste-profile integrate <claude|gemini|codex|claude-desktop|chatgpt> [--off]
+  taste-profile hook on|off
+  taste-profile config get|set <key> [value]
 
 Profile
-  agent-taste section list
-  agent-taste section add "<title>" [--hint "<text>"] [--after "<title>"]
-  agent-taste section rename "<old>" "<new>"
-  agent-taste section hint "<title>" "<text>"
-  agent-taste section remove "<title>" [--archive | --force]
-  agent-taste add "<preference>" -s "<section>"
-  agent-taste log "<choice>" [--why ..] [--folder ..] [--tool ..] [--date YYYY-MM-DD]
-  agent-taste show [section] | search <term> | export json
+  taste-profile section list
+  taste-profile section add "<title>" [--hint "<text>"] [--after "<title>"]
+  taste-profile section rename "<old>" "<new>"
+  taste-profile section hint "<title>" "<text>"
+  taste-profile section remove "<title>" [--archive | --force]
+  taste-profile add "<preference>" -s "<section>"
+  taste-profile log "<choice>" [--why ..] [--folder ..] [--tool ..] [--date YYYY-MM-DD]
+  taste-profile show [section] | search <term> | export json
 
 Capture
-  agent-taste capture [--stdin | <transcript>] [--foreground]
-  agent-taste backfill [--since 30d] [--tool claude|codex|gemini] [--dry-run]
-  agent-taste mcp [--http] [--port 7717] [--read-only] [--rotate-token]`;
+  taste-profile capture [--stdin | <transcript>] [--foreground]
+  taste-profile backfill [--since 30d] [--tool claude|codex|gemini] [--dry-run]
+  taste-profile mcp [--http] [--port 7717] [--read-only] [--rotate-token]`;
 
 const OPTIONS = {
   dir: { type: "string" }, preset: { type: "string" }, yes: { type: "boolean" }, "no-hook": { type: "boolean" },
@@ -72,7 +72,7 @@ export type Flags = ReturnType<typeof parse>["values"];
 const parse = (argv: string[]) => parseArgs({ args: argv, options: OPTIONS, allowPositionals: true, strict: true });
 
 class UsageError extends Error {}
-const need = (v: string | undefined, what: string) => { if (!v) throw new UsageError(`Missing ${what}. See: agent-taste --help`); return v; };
+const need = (v: string | undefined, what: string) => { if (!v) throw new UsageError(`Missing ${what}. See: taste-profile --help`); return v; };
 
 async function mutate(fn: (doc: Doc) => void) {
   const vault = resolveVault();
@@ -188,7 +188,7 @@ async function content(cmd: string, pos: string[], f: Flags, io: IO): Promise<nu
 }
 
 export async function cmdCapture(pos: string[], f: Flags, io: IO): Promise<number> {
-  if (process.env.AGENT_TASTE_CAPTURE) return 0; // we are inside an engine run
+  if (process.env.TASTE_PROFILE_CAPTURE) return 0; // we are inside an engine run
   if (f.stdin) {
     // Hook path: must never fail or block Claude Code.
     try {
@@ -227,22 +227,22 @@ export async function main(argv: string[], io: IO = defaultIO()): Promise<number
         if (f["rotate-token"]) { io.out(GUIDE(rotateToken(vault), port)); return 0; }
         if (f.http) {
           await startHttp(vault, { port, readOnly: f["read-only"] });
-          io.err(`agent-taste MCP on http://127.0.0.1:${port}/mcp (Ctrl+C to stop)`);
+          io.err(`taste-profile MCP on http://127.0.0.1:${port}/mcp (Ctrl+C to stop)`);
         } else await runStdio(vault);
         return await new Promise<number>(() => {}); // server runs until killed / client disconnects
       }
     }
-    io.err(`Unknown command "${cmd}". See: agent-taste --help`);
+    io.err(`Unknown command "${cmd}". See: taste-profile --help`);
     return 1;
   } catch (e) {
     if (e instanceof DocError || e instanceof VaultError || e instanceof UsageError || e instanceof IntegrationError || (e as { code?: string }).code === "ERR_PARSE_ARGS_UNKNOWN_OPTION") {
       io.err((e as Error).message);
       return 1;
     }
-    io.err(`agent-taste: ${(e as Error).stack ?? e}`);
+    io.err(`taste-profile: ${(e as Error).stack ?? e}`);
     return 1;
   }
 }
 
 const entry = (() => { try { return fs.realpathSync(process.argv[1] ?? ""); } catch { return ""; } })();
-if (import.meta.main || entry.endsWith("agent-taste.js")) main(process.argv.slice(2)).then((c) => process.exit(c));
+if (import.meta.main || entry.endsWith("taste-profile.js")) main(process.argv.slice(2)).then((c) => process.exit(c));

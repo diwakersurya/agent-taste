@@ -5,7 +5,7 @@ import { type Ctx, editJson, hasBlock, instruction, type Integration, removeBloc
 
 const mdFile = (ctx: Ctx) => path.join(ctx.home, ".claude", "CLAUDE.md");
 export const settingsFile = (ctx: Ctx) => path.join(ctx.home, ".claude", "settings.json");
-const MARK = "agent-taste.js";
+const MARK = "taste-profile.js";
 
 export function setHook(ctx: Ctx, on: boolean) {
   editJson(settingsFile(ctx), (o) => {
@@ -24,7 +24,7 @@ export const integration: Integration = {
   detect: (ctx) => fs.existsSync(path.join(ctx.home, ".claude")) || !!which("claude"),
   installed: (ctx) => hasBlock(mdFile(ctx)),
   install(ctx, cfg) {
-    upsertBlock(mdFile(ctx), `@~/.agent-taste/taste.md\n\n${instruction(ctx)}`);
+    upsertBlock(mdFile(ctx), `@~/.taste-profile/taste.md\n\n${instruction(ctx)}`);
     setHook(ctx, cfg.hook.enabled);
   },
   remove(ctx) {

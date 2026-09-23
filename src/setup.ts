@@ -13,10 +13,10 @@ import {
 
 const yes = (a: string, dflt = true) => (a === "" ? dflt : /^y/i.test(a));
 
-export function installBin(vault: string, self = process.env.AGENT_TASTE_SELF ?? process.argv[1] ?? ""): boolean {
+export function installBin(vault: string, self = process.env.TASTE_PROFILE_SELF ?? process.argv[1] ?? ""): boolean {
   let real = self;
-  try { real = fs.realpathSync(self); } catch {} // npx / npm -g run us through node_modules/.bin/agent-taste
-  if (path.basename(real) !== "agent-taste.js") return false; // dev/test runs from source; bundled runs copy themselves
+  try { real = fs.realpathSync(self); } catch {} // npx / npm -g run us through node_modules/.bin/taste-profile
+  if (path.basename(real) !== "taste-profile.js") return false; // dev/test runs from source; bundled runs copy themselves
   const dst = paths(vault).bin;
   fs.mkdirSync(path.dirname(dst), { recursive: true });
   if (path.resolve(real) !== path.resolve(dst)) fs.copyFileSync(real, dst);
@@ -42,9 +42,9 @@ function link(vault: string) {
 
 async function chooseDir(f: Flags, io: IO): Promise<string> {
   if (f.dir) return path.resolve(f.dir);
-  const dflt = path.join(home(), "agent-taste");
+  const dflt = path.join(home(), "taste-profile");
   if (f.yes) return dflt;
-  const opts = [...cloudFolders(home()).map((c) => ({ label: `${c.label} (backed up)`, path: path.join(c.path, "agent-taste") })), { label: "Home folder", path: dflt }];
+  const opts = [...cloudFolders(home()).map((c) => ({ label: `${c.label} (backed up)`, path: path.join(c.path, "taste-profile") })), { label: "Home folder", path: dflt }];
   io.out("Where should your taste vault live?");
   opts.forEach((o, i) => io.out(`  ${i + 1}) ${o.label}: ${o.path}`));
   const a = await io.ask(`Number or a custom path [1]: `);
@@ -104,7 +104,7 @@ export function cmdStatus(io: IO): number {
   io.out(`Vault      ${vault}`);
   io.out(`Link       ${linkPath()}`);
   io.out(`Hook       ${cfg.hook.enabled ? `on (${cfg.hook.model})` : "off"}`);
-  io.out(`Bin        ${fs.existsSync(paths(vault).bin) ? paths(vault).bin : "missing — run: npx agent-taste update"}`);
+  io.out(`Bin        ${fs.existsSync(paths(vault).bin) ? paths(vault).bin : "missing — run: npx taste-profile update"}`);
   for (const it of INTEGRATIONS) {
     const state = it.id === "chatgpt" ? (cfg.remote.tokenHash ? "token set" : "not set up") : it.installed(ctx) ? "installed" : cfg.integrations[it.id] ? "enabled but missing — run update" : "off";
     io.out(`${it.label.padEnd(40)} ${state}`);
@@ -145,14 +145,14 @@ export async function cmdUninstall(f: Flags, io: IO): Promise<number> {
   try { vault = resolveVault(); } catch {}
   for (const it of INTEGRATIONS) it.remove(ctx);
   fs.rmSync(linkPath(), { force: true });
-  io.out("Removed agent-taste from all tool configs.");
+  io.out("Removed taste-profile from all tool configs.");
   if (f.purge && vault) {
     const ok = f.yes || (await io.ask(`Delete the vault ${vault} and your taste profile permanently? Type "delete": `)) === "delete";
     if (ok) {
       const p = paths(vault);
       for (const f of [p.md, p.json, p.config, p.log, p.lock]) fs.rmSync(f, { force: true });
       fs.rmSync(path.dirname(p.bin), { recursive: true, force: true });
-      try { fs.rmdirSync(vault); io.out(`Deleted ${vault}`); } catch { io.out(`Deleted agent-taste files; kept ${vault} (it has other files)`); }
+      try { fs.rmdirSync(vault); io.out(`Deleted ${vault}`); } catch { io.out(`Deleted taste-profile files; kept ${vault} (it has other files)`); }
     }
   } else if (vault) io.out(`Your profile is kept at ${vault}`);
   return 0;

@@ -89,7 +89,7 @@ export const findSection = (doc: Doc, name: string) => doc.sections.find((s) => 
 
 function must(doc: Doc, name: string): Section {
   const s = findSection(doc, name);
-  if (!s) throw new DocError(`No section "${name}". Run: agent-taste section list`);
+  if (!s) throw new DocError(`No section "${name}". Run: taste-profile section list`);
   return s;
 }
 
@@ -206,7 +206,7 @@ export function bumpPref(doc: Doc, p: Pref, month: string) {
 
 export function addPref(doc: Doc, section: string, text: string, month: string): { id: string; bumped: boolean } {
   const s = must(doc, section);
-  if (s.slug === DECISIONS) throw new DocError("Use `agent-taste log` for decisions");
+  if (s.slug === DECISIONS) throw new DocError("Use `taste-profile log` for decisions");
   const hit = entries(doc).find((e) => e.section === s && norm(e.pref.text) === norm(text));
   if (hit) {
     bumpPref(doc, hit.pref, month);

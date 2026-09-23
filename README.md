@@ -1,25 +1,25 @@
-# agent-taste
+# taste-profile
 
 One taste profile for all your AI agents. Your preferences and past decisions live in a plain markdown file you own (open it in Obsidian), stored in a folder of your choice — put it in Google Drive / iCloud / Dropbox for backup. Claude Code, Gemini CLI, Codex CLI, Claude Desktop and ChatGPT read it, and it updates itself from your decisions.
 
 ```bash
-npx agent-taste init
+npx taste-profile init
 ```
 
 ## What you get
 - `taste.md` — sections like Code style, Tooling, Financial, Personal, plus a dated Decision log. Edit it any time; your edits win.
 - `taste.json` — the same content, structured for analysis (regenerated automatically).
-- Auto-capture: when a Claude Code session ends, your own messages from it are distilled into the profile by your installed agent CLI (uses your plan; `agent-taste hook off` to disable).
+- Auto-capture: when a Claude Code session ends, your own messages from it are distilled into the profile by your installed agent CLI (uses your plan; `taste-profile hook off` to disable).
 
 ## Commands
 ```
-agent-taste section list | add "<title>" --hint ".." | rename | hint | remove [--archive|--force]
-agent-taste add "<preference>" -s "<section>"
-agent-taste log "<choice>" --why ".." --folder ..
-agent-taste show [section] | search <term>
-agent-taste backfill --since 30d [--dry-run]
-agent-taste integrate <claude|gemini|codex|claude-desktop|chatgpt> [--off]
-agent-taste status | update | uninstall [--purge]
+taste-profile section list | add "<title>" --hint ".." | rename | hint | remove [--archive|--force]
+taste-profile add "<preference>" -s "<section>"
+taste-profile log "<choice>" --why ".." --folder ..
+taste-profile show [section] | search <term>
+taste-profile backfill --since 30d [--dry-run]
+taste-profile integrate <claude|gemini|codex|claude-desktop|chatgpt> [--off]
+taste-profile status | update | uninstall [--purge]
 ```
 
 ## Privacy

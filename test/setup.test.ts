@@ -37,12 +37,12 @@ test("cloudFolders finds Google Drive", () => {
 test("init --yes into dir with space, idempotent, status, uninstall", async () => {
   const dir = path.join(home, "My Drive", "taste");
   expect(await main(["init", "--yes", "--dir", dir], io)).toBe(0);
-  expect(fs.realpathSync(path.join(home, ".agent-taste"))).toBe(dir);
+  expect(fs.realpathSync(path.join(home, ".taste-profile"))).toBe(dir);
   expect(fs.readFileSync(paths(dir).md, "utf8")).toContain("## Code style");
   expect(fs.existsSync(paths(dir).json)).toBe(true);
   const cfg = readConfig(dir);
   expect(cfg.integrations).toMatchObject({ claude: true, gemini: true, chatgpt: false });
-  expect(fs.readFileSync(path.join(home, ".claude/CLAUDE.md"), "utf8")).toContain("@~/.agent-taste/taste.md");
+  expect(fs.readFileSync(path.join(home, ".claude/CLAUDE.md"), "utf8")).toContain("@~/.taste-profile/taste.md");
   expect(JSON.parse(fs.readFileSync(path.join(home, ".claude/settings.json"), "utf8")).hooks.SessionEnd).toHaveLength(1);
 
   const snapshot = fs.readFileSync(path.join(home, ".gemini/GEMINI.md"), "utf8");
@@ -56,7 +56,7 @@ test("init --yes into dir with space, idempotent, status, uninstall", async () =
   expect(await main(["uninstall", "--yes"], io)).toBe(0);
   expect(fs.readFileSync(path.join(home, ".gemini/GEMINI.md"), "utf8")).toBe("mine\n");
   expect(fs.existsSync(path.join(home, ".claude/CLAUDE.md"))).toBe(false);
-  expect(fs.existsSync(path.join(home, ".agent-taste"))).toBe(false);
+  expect(fs.existsSync(path.join(home, ".taste-profile"))).toBe(false);
   expect(fs.existsSync(paths(dir).md)).toBe(true);
 });
 
@@ -83,8 +83,8 @@ test("interactive init: pick custom dir, preset, integrations", async () => {
   expect(readConfig(dir).integrations).toMatchObject({ claude: true, gemini: false });
 });
 
-test("refuses when ~/.agent-taste is a real directory", async () => {
-  fs.mkdirSync(path.join(home, ".agent-taste"));
+test("refuses when ~/.taste-profile is a real directory", async () => {
+  fs.mkdirSync(path.join(home, ".taste-profile"));
   expect(await main(["init", "--yes", "--dir", path.join(home, "v")], io)).toBe(1);
   expect(errs.join()).toMatch(/not a symlink/);
 });

@@ -21,26 +21,26 @@ Your connector token (shown once; it is part of the local URL below):
   ${token}
 
 1. Start the local server and keep it running:
-     npx agent-taste mcp --http --port ${port}
+     npx taste-profile mcp --http --port ${port}
 
 2. Create a tunnel at https://platform.openai.com/settings/organization/tunnels
    (needs Tunnels Read + Manage) and copy its tunnel_id.
 
 3. Install tunnel-client from https://github.com/openai/tunnel-client/releases/latest, then:
      export CONTROL_PLANE_API_KEY="sk-..."   # a Platform key with Tunnels Read + Use
-     tunnel-client init --sample sample_mcp_stdio_local --profile agent-taste \\
+     tunnel-client init --sample sample_mcp_stdio_local --profile taste-profile \\
        --tunnel-id <tunnel_id> \\
        --mcp-server-url http://127.0.0.1:${port}/mcp/${token}
-     tunnel-client doctor --profile agent-taste --explain
-     tunnel-client run --profile agent-taste
+     tunnel-client doctor --profile taste-profile --explain
+     tunnel-client run --profile taste-profile
 
 4. In ChatGPT: https://chatgpt.com/plugins → + (developer-mode app) → Connection: Tunnel →
-   pick your tunnel. Test in a chat: "Use agent-taste read_taste".
+   pick your tunnel. Test in a chat: "Use taste-profile read_taste".
 
 Security: the server listens on 127.0.0.1 only and the tunnel is outbound-only.
 Financial and Personal are hidden remotely (config remote.excludeSections); tools
 are read + append-only, limited to 30 writes/hour. Rotate the token any time with
-  npx agent-taste mcp --rotate-token
+  npx taste-profile mcp --rotate-token
 then re-run step 3's init with the new URL.`;
 
 export const integration: Integration = {

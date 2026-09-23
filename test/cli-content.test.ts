@@ -67,12 +67,12 @@ test("config get/set and hook toggle", async () => {
 
 test("unknown command and missing vault", async () => {
   expect(await main(["wat"], io)).toBe(1);
-  fs.rmSync(path.join(home, ".agent-taste"));
+  fs.rmSync(path.join(home, ".taste-profile"));
   expect(await main(["show"], io)).toBe(1);
-  expect(errs.join()).toMatch(/npx agent-taste init/);
+  expect(errs.join()).toMatch(/npx taste-profile init/);
 });
 
 test("--help", async () => {
   expect(await main(["--help"], io)).toBe(0);
-  expect(outs.join("\n")).toContain("agent-taste section add");
+  expect(outs.join("\n")).toContain("taste-profile section add");
 });

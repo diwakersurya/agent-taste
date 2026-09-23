@@ -37,7 +37,7 @@ test("parseOps tolerates prose and fences", () => {
 
 test("buildPrompt lists ids, hints, marker", () => {
   const p = buildPrompt(parse(MIN), "\n## claude x\n> hello\n");
-  expect(p.startsWith("<agent-taste-capture/>")).toBe(true);
+  expect(p.startsWith("<taste-profile-capture/>")).toBe(true);
   expect(p).toContain("[code_style.1] Use X (seen 2x, 2026-08..09)");
   expect(p).toContain("### personal — Personal (hint: life)");
   expect(p).toContain("> hello");
@@ -51,7 +51,7 @@ test("runEngine timeout kills and rejects", async () => {
 
 test("runEngine passes recursion guard env", async () => {
   const probe = path.join(home, "probe.sh");
-  fs.writeFileSync(probe, "#!/bin/sh\ncat >/dev/null\necho \"$AGENT_TASTE_CAPTURE\"\n", { mode: 0o755 });
+  fs.writeFileSync(probe, "#!/bin/sh\ncat >/dev/null\necho \"$TASTE_PROFILE_CAPTURE\"\n", { mode: 0o755 });
   expect((await runEngine([probe], "x")).trim()).toBe("1");
 });
 

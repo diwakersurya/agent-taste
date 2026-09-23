@@ -61,7 +61,7 @@ Rules: prefer bump/replace over add; never duplicate; financial/personal section
 
 export function runEngine(argv: string[], input: string, timeoutMs = 180_000): Promise<string> {
   return new Promise((resolve, reject) => {
-    const c = spawn(argv[0], argv.slice(1), { cwd: os.tmpdir(), env: { ...process.env, AGENT_TASTE_CAPTURE: "1" }, stdio: ["pipe", "pipe", "pipe"] });
+    const c = spawn(argv[0], argv.slice(1), { cwd: os.tmpdir(), env: { ...process.env, TASTE_PROFILE_CAPTURE: "1" }, stdio: ["pipe", "pipe", "pipe"] });
     let out = "", err = "";
     const t = setTimeout(() => { c.kill("SIGKILL"); reject(new Error(`engine timed out after ${timeoutMs}ms`)); }, timeoutMs);
     c.stdout.on("data", (d) => (out += d));

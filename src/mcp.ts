@@ -29,7 +29,7 @@ export function createServer(vault: string, o: ServerOpts): McpServer {
   // Archived can hold entries moved out of hidden sections, so it is never exposed remotely.
   const hidden = (s: string) => o.remote && (s === ARCHIVED || readConfig(vault).remote.excludeSections.includes(s));
   const visible = (doc: Doc): Doc => ({ preamble: doc.preamble, sections: doc.sections.filter((s) => !hidden(s.slug)) });
-  const s = new McpServer({ name: "agent-taste", version: VERSION });
+  const s = new McpServer({ name: "taste-profile", version: VERSION });
 
   s.registerTool("list_sections", { description: "List the user's taste profile sections with hints and entry counts.", inputSchema: {} }, async () => {
     const doc = visible(loadDoc(vault));
@@ -114,7 +114,7 @@ const ORIGINS = [/^https:\/\/([a-z0-9-]+\.)*(openai\.com|chatgpt\.com)$/];
 
 export function startHttp(vault: string, o: { port?: number; readOnly?: boolean } = {}): Promise<http.Server> {
   const cfg0 = readConfig(vault);
-  if (!cfg0.remote.tokenHash) throw new Error("No token set. Run: agent-taste integrate chatgpt");
+  if (!cfg0.remote.tokenHash) throw new Error("No token set. Run: taste-profile integrate chatgpt");
   const allowWrite = makeLimiter(cfg0.remote.writesPerHour);
   const srv = http.createServer(async (req, res) => {
     const deny = (code: number, msg: string) => { if (!res.headersSent) res.writeHead(code, { "content-type": "text/plain" }); res.end(msg); };

@@ -129,7 +129,7 @@ describe("I9 legacy cleanup backs up originals", () => {
     const orig = "@~/AI-Vault/taste.md\n\n<!-- taste-log:start -->\nrule\n<!-- taste-log:end -->\n";
     fs.writeFileSync(f, orig);
     cleanLegacy(makeCtx(home));
-    expect(fs.readFileSync(f + ".bak-agent-taste", "utf8")).toBe(orig);
+    expect(fs.readFileSync(f + ".bak-taste-profile", "utf8")).toBe(orig);
   });
 });
 

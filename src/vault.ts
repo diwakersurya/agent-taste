@@ -7,7 +7,7 @@ import { toJson } from "./json";
 export class VaultError extends Error {}
 
 export const home = () => process.env.HOME || os.homedir();
-export const linkPath = () => path.join(home(), ".agent-taste");
+export const linkPath = () => path.join(home(), ".taste-profile");
 
 export type Config = {
   version: 1;
@@ -32,13 +32,13 @@ export const paths = (vault: string) => ({
   config: path.join(vault, "config.json"),
   log: path.join(vault, "capture.log"),
   lock: path.join(vault, ".lock"),
-  bin: path.join(vault, "bin", "agent-taste.js"),
+  bin: path.join(vault, "bin", "taste-profile.js"),
 });
 
 export function resolveVault(): string {
   let v: string;
   try { v = fs.realpathSync(linkPath()); } catch {
-    throw new VaultError(`Vault not found at ${linkPath()}. Run: npx agent-taste init`);
+    throw new VaultError(`Vault not found at ${linkPath()}. Run: npx taste-profile init`);
   }
   if (!fs.existsSync(paths(v).md)) throw new VaultError(`taste.md not found in ${v}`);
   return v;
@@ -95,7 +95,7 @@ export async function withLock<T>(vault: string, fn: () => T | Promise<T>): Prom
     }
     try { return await fn(); } finally { fs.rmSync(f, { force: true }); }
   }
-  throw new VaultError("taste.md is locked by another agent-taste process; try again");
+  throw new VaultError("taste.md is locked by another taste-profile process; try again");
 }
 
 export const appendLog = (vault: string, line: string) =>

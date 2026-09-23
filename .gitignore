@@ -12,7 +12,7 @@ docs/
 
 # temp files from atomic writes and tests
 *.tmp
-*.bak-agent-taste
+*.bak-taste-profile
 
 # logs
 *.log

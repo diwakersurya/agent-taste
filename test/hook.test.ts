@@ -8,10 +8,10 @@ import { makeVault, tmpHome } from "./helpers";
 let home: string, vault: string;
 const io: IO = { out: () => {}, err: () => {}, ask: async () => "", stdin: async () => "" };
 const withStdin = (s: string): IO => ({ ...io, stdin: async () => s });
-beforeEach(() => { home = tmpHome(); vault = makeVault(home); delete process.env.AGENT_TASTE_CAPTURE; });
+beforeEach(() => { home = tmpHome(); vault = makeVault(home); delete process.env.TASTE_PROFILE_CAPTURE; });
 
 test("recursion guard exits 0 without touching anything", async () => {
-  process.env.AGENT_TASTE_CAPTURE = "1";
+  process.env.TASTE_PROFILE_CAPTURE = "1";
   expect(await main(["capture", "--stdin"], withStdin('{"transcript_path":"/x"}'))).toBe(0);
   expect(fs.existsSync(paths(vault).json)).toBe(false);
 });

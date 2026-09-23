@@ -5,5 +5,5 @@
 {"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"file contents that must be dropped"}]}}
 {"type":"user","isMeta":true,"message":{"role":"user","content":"meta dropped"}}
 {"type":"user","message":{"role":"user","content":"This session is being continued from a previous conversation..."}}
-{"type":"user","message":{"role":"user","content":"<agent-taste-capture/>\nour own prompt"}}
+{"type":"user","message":{"role":"user","content":"<taste-profile-capture/>\nour own prompt"}}
 {"type":"user","message":{"role":"user","content":[{"type":"text","text":"you dont need to write name label"}]}}

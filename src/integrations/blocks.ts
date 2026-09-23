@@ -3,10 +3,10 @@ import path from "node:path";
 import { which } from "../capture";
 import { atomicWrite, type Config } from "../vault";
 
-export const START = "<!-- agent-taste:start -->";
-export const END = "<!-- agent-taste:end -->";
-const BLOCK = /\n<!-- agent-taste:start -->[\s\S]*?<!-- agent-taste:end -->\n/;
-const BAK = ".bak-agent-taste";
+export const START = "<!-- taste-profile:start -->";
+export const END = "<!-- taste-profile:end -->";
+const BLOCK = /\n<!-- taste-profile:start -->[\s\S]*?<!-- taste-profile:end -->\n/;
+const BAK = ".bak-taste-profile";
 
 export class IntegrationError extends Error {}
 
@@ -20,9 +20,9 @@ export type Integration = {
 
 export const makeCtx = (home: string): Ctx => ({
   home,
-  bin: path.join(home, ".agent-taste", "bin", "agent-taste.js"),
+  bin: path.join(home, ".taste-profile", "bin", "taste-profile.js"),
   node: which("node") ?? process.execPath, // shim survives node upgrades; execPath is versioned
-  taste: path.join(home, ".agent-taste", "taste.md"),
+  taste: path.join(home, ".taste-profile", "taste.md"),
 });
 
 export const instruction = (ctx: Ctx) =>
@@ -35,7 +35,7 @@ const read = (f: string) => (fs.existsSync(f) ? fs.readFileSync(f, "utf8") : nul
 // modified by us earlier, and backing it up would make uninstall keep a file we created.
 export function backupOnce(f: string) {
   if (!fs.existsSync(f) || fs.existsSync(f + BAK)) return;
-  if (fs.readFileSync(f, "utf8").includes("agent-taste")) return;
+  if (fs.readFileSync(f, "utf8").includes("taste-profile")) return;
   fs.copyFileSync(f, f + BAK);
 }
 

@@ -20,7 +20,7 @@ describe("blocks", () => {
     const f = w("x.md", orig);
     upsertBlock(f, "body");
     upsertBlock(f, "body");
-    expect(r(f).match(/agent-taste:start/g)).toHaveLength(1);
+    expect(r(f).match(/taste-profile:start/g)).toHaveLength(1);
     removeBlock(f);
     expect(r(f)).toBe(orig);
   });
@@ -38,15 +38,15 @@ describe("blocks", () => {
     removeBlock(f);
     expect(fs.existsSync(f)).toBe(false);
     const j = path.join(home, "new2", "c.json");
-    editJson(j, (o) => { o["agent-taste"] = 1; });
-    editJson(j, (o) => { o["agent-taste"] = 2; });
-    editJson(j, (o) => { delete o["agent-taste"]; });
+    editJson(j, (o) => { o["taste-profile"] = 1; });
+    editJson(j, (o) => { o["taste-profile"] = 2; });
+    editJson(j, (o) => { delete o["taste-profile"]; });
     expect(fs.existsSync(j)).toBe(false);
   });
   test("backup written once", () => {
     const f = w("x.md", "orig");
     upsertBlock(f, "1"); upsertBlock(f, "2");
-    expect(r(f + ".bak-agent-taste")).toBe("orig");
+    expect(r(f + ".bak-taste-profile")).toBe("orig");
   });
   test("editJson keeps indent, refuses invalid JSON", () => {
     const f = w("c.json", '{\n    "a": 1\n}\n');
@@ -62,17 +62,17 @@ describe("blocks", () => {
 
 describe("tools", () => {
   const cfg = defaultConfig("/v");
-  test("claude: import uses ~/.agent-taste, hook added and removed", () => {
+  test("claude: import uses ~/.taste-profile, hook added and removed", () => {
     const ctx = makeCtx(home);
     const md = w(".claude/CLAUDE.md", "mine\n");
     const settings = w(".claude/settings.json", JSON.stringify({ hooks: { SessionEnd: [{ hooks: [{ type: "command", command: "other" }] }] } }, null, 2) + "\n");
     const before = JSON.parse(r(settings));
     claude.install(ctx, cfg);
-    expect(r(md)).toContain("@~/.agent-taste/taste.md");
+    expect(r(md)).toContain("@~/.taste-profile/taste.md");
     expect(r(md)).not.toContain("My Drive");
     const s = JSON.parse(r(settingsFile(ctx)));
     expect(s.hooks.SessionEnd).toHaveLength(2);
-    expect(s.hooks.SessionEnd[1].hooks[0].command).toBe(`f="${home}/.agent-taste/bin/agent-taste.js"; [ -f "$f" ] && node "$f" capture --stdin; exit 0`);
+    expect(s.hooks.SessionEnd[1].hooks[0].command).toBe(`f="${home}/.taste-profile/bin/taste-profile.js"; [ -f "$f" ] && node "$f" capture --stdin; exit 0`);
     claude.install(ctx, cfg);
     expect(JSON.parse(r(settings)).hooks.SessionEnd).toHaveLength(2);
     claude.remove(ctx);
@@ -90,8 +90,8 @@ describe("tools", () => {
     const ctx = makeCtx(home);
     gemini.install(ctx, cfg);
     codex.install(ctx, cfg);
-    expect(r(path.join(home, ".gemini/GEMINI.md"))).toContain(`@${home}/.agent-taste/taste.md`);
-    expect(r(path.join(home, ".codex/AGENTS.md"))).toContain(`read ${home}/.agent-taste/taste.md`);
+    expect(r(path.join(home, ".gemini/GEMINI.md"))).toContain(`@${home}/.taste-profile/taste.md`);
+    expect(r(path.join(home, ".codex/AGENTS.md"))).toContain(`read ${home}/.taste-profile/taste.md`);
     gemini.remove(ctx); codex.remove(ctx);
     expect(fs.existsSync(path.join(home, ".gemini/GEMINI.md"))).toBe(false);
   });
@@ -102,7 +102,7 @@ describe("tools", () => {
     fs.writeFileSync(f, JSON.stringify({ mcpServers: { other: { command: "x" } }, preferences: { a: 1 } }, null, 2) + "\n");
     const before = JSON.parse(r(f));
     desktop.install(ctx, cfg);
-    expect(JSON.parse(r(f)).mcpServers["agent-taste"]).toEqual({ command: ctx.node, args: [ctx.bin, "mcp"] });
+    expect(JSON.parse(r(f)).mcpServers["taste-profile"]).toEqual({ command: ctx.node, args: [ctx.bin, "mcp"] });
     expect(desktop.installed(ctx)).toBe(true);
     desktop.remove(ctx);
     expect(JSON.parse(r(f))).toEqual(before);

@@ -1,7 +1,7 @@
 import fs from "node:fs";
 
 export type Session = { tool: "claude" | "codex" | "gemini"; date: string; cwd: string; messages: string[] };
-export const CAPTURE_MARK = "<agent-taste-capture/>";
+export const CAPTURE_MARK = "<taste-profile-capture/>";
 
 const MAX = 1500;
 const NOISE = /<(system-reminder|environment_context|command-[a-z]+|local-command-[a-z]+|user_instructions)>[\s\S]*?<\/\1>/g;

@@ -33,7 +33,7 @@ test("401 without / with wrong token", async () => {
 test("bearer and secret path both work", async () => {
   const a = await fetch(`${base}/mcp`, { method: "POST", headers: { ...H, authorization: `Bearer ${token}` }, body: JSON.stringify(INIT) });
   expect(a.status).toBe(200);
-  expect(await a.text()).toContain("agent-taste");
+  expect(await a.text()).toContain("taste-profile");
   const b = await fetch(`${base}/mcp/${token}`, { method: "POST", headers: H, body: JSON.stringify(INIT) });
   expect(b.status).toBe(200);
 });

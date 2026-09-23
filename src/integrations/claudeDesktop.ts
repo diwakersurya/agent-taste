@@ -12,14 +12,14 @@ const read = (ctx: Ctx) => { try { return JSON.parse(fs.readFileSync(desktopConf
 export const integration: Integration = {
   id: "claudeDesktop", label: "Claude Desktop (MCP)",
   detect: (ctx) => fs.existsSync(path.dirname(desktopConfigFile(ctx))),
-  installed: (ctx) => !!read(ctx).mcpServers?.["agent-taste"],
+  installed: (ctx) => !!read(ctx).mcpServers?.["taste-profile"],
   install: (ctx) => editJson(desktopConfigFile(ctx), (o) => {
     o.mcpServers ??= {};
-    o.mcpServers["agent-taste"] = { command: ctx.node, args: [ctx.bin, "mcp"] };
+    o.mcpServers["taste-profile"] = { command: ctx.node, args: [ctx.bin, "mcp"] };
   }),
   remove: (ctx) => editJson(desktopConfigFile(ctx), (o) => {
     if (!o.mcpServers) return;
-    delete o.mcpServers["agent-taste"];
+    delete o.mcpServers["taste-profile"];
     if (!Object.keys(o.mcpServers).length) delete o.mcpServers;
   }),
 };
