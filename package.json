@@ -1,0 +1,45 @@
+{
+  "name": "agent-taste",
+  "version": "0.1.0",
+  "description": "One taste profile for all your AI agents: markdown you own, updated from your decisions.",
+  "type": "module",
+  "bin": {
+    "agent-taste": "dist/agent-taste.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "bun build src/cli.ts --target=node --outfile dist/agent-taste.js --banner '#!/usr/bin/env node' && chmod +x dist/agent-taste.js",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "bun test && bun run build"
+  },
+  "keywords": [
+    "ai",
+    "claude",
+    "codex",
+    "gemini",
+    "chatgpt",
+    "mcp",
+    "preferences",
+    "obsidian",
+    "memory"
+  ],
+  "author": "diwakersurya <diwaker.surya@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/diwakersurya/agent-taste.git"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "@types/node": "^26.6.2",
+    "bun-types": "^1.4.2",
+    "typescript": "^7.0.2",
+    "zod": "^4.6.5"
+  }
+}
