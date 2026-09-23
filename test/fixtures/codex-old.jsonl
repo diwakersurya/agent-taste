@@ -1,0 +1,4 @@
+{"id":"x","timestamp":"2025-08-29T11:08:31.622Z","instructions":null}
+{"record_type":"state"}
+{"type":"message","role":"user","content":[{"type":"input_text","text":"<environment_context>\n<cwd>/x</cwd>\n</environment_context>"}]}
+{"type":"message","role":"user","content":[{"type":"input_text","text":"# Context from my IDE setup:\n\n## Open tabs:\n- a.ts\n\n## My request for Codex:\nexplain this codebase\n"}]}

@@ -1,0 +1,9 @@
+{"type":"summary","summary":"x"}
+{"type":"user","timestamp":"2026-09-22T10:00:00Z","cwd":"/home/u/code/app","message":{"role":"user","content":"<system-reminder>ignore me</system-reminder>Build a menubar app"}}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"ok"}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"Your questions have been answered: \"Where?\"=\"Floating shelf\""}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"file contents that must be dropped"}]}}
+{"type":"user","isMeta":true,"message":{"role":"user","content":"meta dropped"}}
+{"type":"user","message":{"role":"user","content":"This session is being continued from a previous conversation..."}}
+{"type":"user","message":{"role":"user","content":"<agent-taste-capture/>\nour own prompt"}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"you dont need to write name label"}]}}

@@ -1,0 +1,3 @@
+{"sessionId":"s","projectHash":"abcdef123456","startTime":"2025-10-23T12:56:00.693Z","messages":[
+ {"type":"user","content":"analyse this file\n--- Content from referenced context ---\nhuge file dump"},
+ {"type":"gemini","content":"sure"}]}

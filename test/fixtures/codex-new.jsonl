@@ -1,0 +1,3 @@
+{"type":"session_meta","timestamp":"2026-03-12T09:00:00Z","payload":{"cwd":"/home/u/code/copy"}}
+{"type":"response_item","payload":{"type":"message","role":"user","content":[{"type":"input_text","text":"keep node config in the side panel"}]}}
+{"type":"response_item","payload":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"sure"}]}}
